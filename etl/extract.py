@@ -45,7 +45,7 @@ class AlphaVantageClient:
         Docs: https://www.alphavantage.co/documentation/
         """
         params = {
-            "function": "TIME_SERIES_INTRADAY",
+            "function": "TIME_SERIES_DAILY",
             "symbol": symbol,
             "interval": interval,
             "apikey": self.api_key,
