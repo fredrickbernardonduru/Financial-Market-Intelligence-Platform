@@ -1,0 +1,1 @@
+#Clean + moving averages + RSI + VWAP
