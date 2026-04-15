@@ -3,26 +3,30 @@ from psycopg2.extras import execute_batch
 import logging
 from typing import List, Dict, Any
 
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+
 
 def get_connection():
     return psycopg2.connect(
         host="localhost",
         port=5432,
-        db_name="your_db",
-        password = "your_password"
+        dbname="your_db",
+        user="your_user",
+        password="your_password"
     )
 
-def load_to_postgres(records: List[Dict[str,Any]]):
+
+def load_to_postgres(records: List[Dict[str, Any]]):
     """
-    Bulk ;oad records into PostgreSQL with UPSERT logic
+    Bulk load records into PostgreSQL with UPSERT logic
     """
 
     if not records:
         logger.warning("No records to load")
         return
-    
+
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -53,3 +57,17 @@ def load_to_postgres(records: List[Dict[str,Any]]):
         for r in records
     ]
 
+    try:
+        execute_batch(cursor, query, data, page_size=100)
+        conn.commit()
+
+        logger.info(f"Loaded {len(records)} records into PostgreSQL")
+
+    except Exception as e:
+        conn.rollback()
+        logger.error(f"Load failed: {e}")
+        raise
+
+    finally:
+        cursor.close()
+        conn.close()
