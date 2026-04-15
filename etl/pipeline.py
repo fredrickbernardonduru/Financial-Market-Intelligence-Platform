@@ -69,4 +69,4 @@ if __name__ == "__main__":
 
 
 # after validation
-load_to_postgres(valid_records)
+load_to_postgres(results)
