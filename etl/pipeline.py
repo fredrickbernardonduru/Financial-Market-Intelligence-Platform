@@ -6,6 +6,7 @@ import os
 from etl.extract import AlphaVantageClient
 from etl.clean import normalize_daily_series
 from etl.validate import validate_batch
+from etl.load import load_to_postgres
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
@@ -64,3 +65,8 @@ if __name__ == "__main__":
     results = run_pipeline(symbol)
 
     print(f"\nPipeline finished. Total valid records: {len(results)}")
+
+
+
+# after validation
+load_to_postgres(valid_records)
