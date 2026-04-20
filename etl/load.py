@@ -1,9 +1,10 @@
 import os
+import logging
+from typing import List, Dict, Any
+
 from dotenv import load_dotenv
 import psycopg2
 from psycopg2.extras import execute_batch
-import logging
-from typing import List, Dict, Any
 
 load_dotenv(dotenv_path=".env")
 
@@ -12,35 +13,42 @@ logging.basicConfig(level=logging.INFO)
 
 
 def get_connection():
+    db_host = os.getenv("DB_HOST")
+    db_port = os.getenv("DB_PORT")
+    db_name = os.getenv("DB_NAME")
+    db_user = os.getenv("DB_USER")
+    db_password = os.getenv("DB_PASSWORD")
 
-    print("\n🔍 DEBUG ENV VALUES")
-    print("HOST:", repr(os.getenv("DB_HOST")))
-    print("PORT:", repr(os.getenv("DB_PORT")))
-    print("DB:", repr(os.getenv("DB_NAME")))
-    print("USER:", repr(os.getenv("DB_USER")))
-    print("PASSWORD:", repr(os.getenv("DB_PASSWORD")))
-    print()
+    missing = [
+        name for name, value in {
+            "DB_HOST": db_host,
+            "DB_PORT": db_port,
+            "DB_NAME": db_name,
+            "DB_USER": db_user,
+            "DB_PASSWORD": db_password,
+        }.items() if not value
+    ]
+
+    if missing:
+        raise ValueError(f"Missing required environment variables: {', '.join(missing)}")
 
     return psycopg2.connect(
-        host=os.getenv("DB_HOST"),
-        port=os.getenv("DB_PORT"),
-        dbname=os.getenv("DB_NAME"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
+        host=db_host,
+        port=int(db_port),
+        dbname=db_name,
+        user=db_user,
+        password=db_password,
     )
 
 
-def load_to_postgres(records: List[Dict[str, Any]]):
+def load_to_postgres(records: List[Dict[str, Any]]) -> None:
     """
-    Bulk load records into PostgreSQL with UPSERT logic
+    Bulk load records into PostgreSQL with UPSERT logic.
     """
 
     if not records:
         logger.warning("No records to load")
         return
-
-    conn = get_connection()
-    cursor = conn.cursor()
 
     query = """
         INSERT INTO bronze_stock_ticks (
@@ -69,17 +77,26 @@ def load_to_postgres(records: List[Dict[str, Any]]):
         for r in records
     ]
 
+    conn = None
+    cursor = None
+
     try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
         execute_batch(cursor, query, data, page_size=100)
         conn.commit()
 
         logger.info(f"Loaded {len(records)} records into PostgreSQL")
 
     except Exception as e:
-        conn.rollback()
+        if conn:
+            conn.rollback()
         logger.error(f"Load failed: {e}")
         raise
 
     finally:
-        cursor.close()
-        conn.close()
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
