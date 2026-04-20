@@ -24,7 +24,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: Huxtler4126
+      POSTGRES_PASSWORD: postgres123
       POSTGRES_DB: financial_db
     ports:
       - "5432:5432"
