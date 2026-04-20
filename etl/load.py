@@ -5,13 +5,22 @@ from psycopg2.extras import execute_batch
 import logging
 from typing import List, Dict, Any
 
-load_dotenv(dotenv_path="docker/.env")
+load_dotenv(dotenv_path=".env")
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
 def get_connection():
+
+    print("\n🔍 DEBUG ENV VALUES")
+    print("HOST:", repr(os.getenv("DB_HOST")))
+    print("PORT:", repr(os.getenv("DB_PORT")))
+    print("DB:", repr(os.getenv("DB_NAME")))
+    print("USER:", repr(os.getenv("DB_USER")))
+    print("PASSWORD:", repr(os.getenv("DB_PASSWORD")))
+    print()
+
     return psycopg2.connect(
         host=os.getenv("DB_HOST"),
         port=os.getenv("DB_PORT"),
