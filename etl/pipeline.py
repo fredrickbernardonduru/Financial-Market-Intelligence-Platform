@@ -42,6 +42,8 @@ def run_pipeline(symbol: str):
 
 
 if __name__ == "__main__":
-    symbol = "AAPL"
+    symbols = ["AAPL", "MSFT"]
+    for symbol in symbols:
+        run_pipeline(symbol)
     results = run_pipeline(symbol)
     logger.info(f"Total valid records processed for {symbol}: {len(results)}")
