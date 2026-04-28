@@ -1,5 +1,11 @@
 import logging
+import os
+import json
+import logging
+from typing import List, Dict, Any
 
+from dotenv import load_dotenv
+from kafka import KafkaProducer
 from etl.extract import AlphaVantageClient
 from etl.clean import normalize_daily_series
 from etl.validate import validate_batch
