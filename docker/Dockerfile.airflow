@@ -1,0 +1,19 @@
+FROM apache/airflow:2.9.0
+
+USER root
+
+# Install system dependencies if needed
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+USER airflow
+
+# Install Python dependencies needed by your project
+RUN pip install --no-cache-dir \
+    pandas \
+    psycopg2-binary \
+    python-dotenv \
+    requests \
+    kafka-python
