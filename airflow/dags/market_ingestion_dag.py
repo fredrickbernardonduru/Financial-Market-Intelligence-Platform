@@ -46,6 +46,45 @@ def run_anomaly_detection():
     df = run_anomaly_pipeline()
     print(f"Anomaly detection completed. Anomalies detected: {len(df)}")
 
+def validate_pipeline_outputs():
+    import os
+    import psycopg2
+
+    required_tables = {
+        "bronze_stock_ticks": 1,
+        "silver_stock_indicators": 1,
+        "gold_daily_summary": 1,
+        "gold_anomalies": 0,
+    }
+
+    conn = psycopg2.connect(
+        host=os.getenv("DB_HOST"),
+        port=int(os.getenv("DB_PORT", 5432)),
+        dbname=os.getenv("DB_NAME"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+    )
+
+    try:
+        cursor = conn.cursor()
+
+        for table_name, minimum_count in required_tables.items():
+            cursor.execute(f"SELECT COUNT(*) FROM {table_name};")
+            count = cursor.fetchone()[0]
+
+            print(f"{table_name}: {count} rows")
+
+            if count < minimum_count:
+                raise ValueError(
+                    f"Validation failed: {table_name} has {count} rows, "
+                    f"expected at least {minimum_count}"
+                )
+
+        print("Pipeline output validation passed successfully.")
+
+    finally:
+        cursor.close()
+        conn.close()
 
 with DAG(
     dag_id="market_ingestion_dag",
