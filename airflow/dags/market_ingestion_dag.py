@@ -46,6 +46,7 @@ def run_anomaly_detection():
     df = run_anomaly_pipeline()
     print(f"Anomaly detection completed. Anomalies detected: {len(df)}")
 
+
 def validate_pipeline_outputs():
     import os
     import psycopg2
@@ -68,6 +69,8 @@ def validate_pipeline_outputs():
     try:
         cursor = conn.cursor()
 
+        print("\n========== PIPELINE OUTPUT VALIDATION ==========")
+
         for table_name, minimum_count in required_tables.items():
             cursor.execute(f"SELECT COUNT(*) FROM {table_name};")
             count = cursor.fetchone()[0]
@@ -81,10 +84,12 @@ def validate_pipeline_outputs():
                 )
 
         print("Pipeline output validation passed successfully.")
+        print("================================================\n")
 
     finally:
         cursor.close()
         conn.close()
+
 
 with DAG(
     dag_id="market_ingestion_dag",
@@ -116,9 +121,15 @@ with DAG(
         python_callable=run_anomaly_detection,
     )
 
+    validate_outputs = PythonOperator(
+        task_id="validate_pipeline_outputs",
+        python_callable=validate_pipeline_outputs,
+    )
+
     (
         extract_validate_load_kafka
         >> calculate_indicators
         >> gold_aggregations
         >> anomaly_detection
+        >> validate_outputs
     )
