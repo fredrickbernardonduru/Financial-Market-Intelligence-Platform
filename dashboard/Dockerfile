@@ -1,21 +1,17 @@
-FROM node:20-alpine AS deps
-WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm ci
+FROM python:3.11-slim
 
-FROM node:20-alpine AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-RUN npm run build
 
-FROM node:20-alpine AS runner
-WORKDIR /app
-ENV NODE_ENV production
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+RUN pip install --no-cache-dir \
+    flask==3.0.3 \
+    flask-cors==4.0.1 \
+    psycopg2-binary==2.9.9 \
+    requests==2.31.0 \
+    gunicorn==22.0.0
+
+COPY api.py .
+COPY static/ ./static/
 
 EXPOSE 3000
-ENV PORT 3000
-CMD ["node", "server.js"]
+
+CMD ["gunicorn", "--bind", "0.0.0.0:3000", "--workers", "2", "--timeout", "30", "api:app"]
