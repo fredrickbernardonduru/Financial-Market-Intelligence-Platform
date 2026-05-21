@@ -128,10 +128,10 @@ services:
     command: webserver
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
-      interval: 15s
-      timeout: 10s
-      retries: 10
-      start_period: 30s
+      interval: 20s
+      timeout: 15s
+      retries: 15
+      start_period: 120s
 
   # ── Airflow scheduler ──────────────────────────────────────────────
   airflow-scheduler:
@@ -178,7 +178,7 @@ services:
       postgres:
         condition: service_healthy
       airflow-webserver:
-        condition: service_healthy
+        condition: service_started
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
