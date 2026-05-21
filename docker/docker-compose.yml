@@ -35,9 +35,7 @@ services:
     image: confluentinc/cp-kafka:7.5.0
     container_name: market_kafka
     restart: unless-stopped
-    depends_on:
-      zookeeper:
-        condition: service_healthy
+    depends_on:`n      - zookeeper`n
     ports:
       - "9092:9092"
       - "29092:29092"
@@ -196,3 +194,4 @@ services:
 volumes:
   postgres_data:
   airflow_logs:
+
