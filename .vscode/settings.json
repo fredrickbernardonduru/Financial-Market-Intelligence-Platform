@@ -10,6 +10,17 @@
             "database": "financial_market_intelligence",
             "username": "postgres",
             "password": "Huxtler41268690"
+        },
+        {
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "Financial Market DB",
+            "database": "financial_market_db",
+            "username": "postgres",
+            "password": "Huxtler41268690"
         }
     ]
 }
